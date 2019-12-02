@@ -20,10 +20,6 @@ namespace A4_Rest_App
         public string GetRandomMealAsync(string foodName)
         {
 
-            string[] keyLookingFor = { "idMeal", "strMeal", "strCategory", "strArea", "strInstructions", "strTags" };
-
-            // Dictionary<string, Dictionary<string, string>[]> newDictionary = new Dictionary<string, Dictionary<string, string>[]>();
-
             Dictionary<int, Dictionary<string, string>> newDictionary = new Dictionary<int, Dictionary<string, string>>();
 
             int counter = 1;
@@ -35,13 +31,10 @@ namespace A4_Rest_App
             if (isSignedIn == true)
             {
                 string url = "https://www.themealdb.com/api/json/v1/1/random.php";
-                //string url = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + foodName;
-
+              
                 var client = new RestClient(url);
 
                 var request = new RestRequest(Method.GET);
-                //request.AddHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com");
-                //request.AddHeader("key", "1");
                 IRestResponse response = client.Execute(request);
 
                 string data = response.Content;
@@ -59,18 +52,6 @@ namespace A4_Rest_App
                     return "";
                 }
 
-                //Console.WriteLine("NEW DICTIONAIRY: " + JsonConvert.SerializeObject(newDictionary));
-
-                //object test;
-                //if (values.TryGetValue("drinks", out test)) // Returns true.
-                //{
-                //    //Console.WriteLine(test); // This is the value at key1.
-
-
-
-                //    return JsonConvert.SerializeObject(test);
-                //}
-                //return "";
             }
 
             return "";
@@ -78,79 +59,130 @@ namespace A4_Rest_App
         }
 
 
+        [HttpGet]
+        [Route("/api/food/letterlist")]
+        [Obsolete]
+        public string GetFoodByLetter(string letter)
+        {
+            int counter = 1;
+
+
+            var user = HttpContext.User;
+            Boolean isSignedIn = user.Identity.IsAuthenticated;
+
+            if (isSignedIn == true)
+            {
+                string url = "https://www.themealdb.com/api/json/v1/1/search.php?f=" + letter;
+
+                var client = new RestClient(url);
+
+                var request = new RestRequest(Method.GET);
+                IRestResponse response = client.Execute(request);
+
+                string data = response.Content;
+
+                Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+
+                try
+                {
+                    if (values.ContainsKey("meals"))
+                    {
+                        string myFood = getFoodInfo(values);
+                        return myFood;
+
+                    }
+                    else
+                    {
+                        return "";
+                    }
+                }
+                catch (Exception e)
+                {
+                    return "";
+                }
+
+            }
+
+            return "";
+        }
+
         public string getFoodInfo(Dictionary<string, object> values)
         {
-            string[] keyLookingFor = { "idMeal", "strMeal", "strCategory", "strArea", "strInstructions", "strTags" };
-
-            // Dictionary<string, Dictionary<string, string>[]> newDictionary = new Dictionary<string, Dictionary<string, string>[]>();
+            string[] keyLookingFor = { "idMeal", "strMeal", "strCategory", "strArea", "strInstructions", "strTags", "strIngredient" };
 
             Dictionary<int, Dictionary<string, string>> newDictionary = new Dictionary<int, Dictionary<string, string>>();
             int counter = 1;
 
-
-            foreach (var item in values)
+            try
             {
-
-                IEnumerable list = item.Value as IEnumerable;
-
-
-                foreach (Object element in list)
+                foreach (var item in values)
                 {
 
-                    Dictionary<string, string> newVal = JsonConvert.DeserializeObject<Dictionary<string, string>>(element.ToString());
+                    IEnumerable list = item.Value as IEnumerable;
 
-                    Dictionary<string, string> keyValuePairDict = new Dictionary<string, string>();
 
-                    for (var i = 0; i < keyLookingFor.Length; i++)
+                    foreach (Object element in list)
                     {
-                        if (i < 5)
+
+                        Dictionary<string, string> newVal = JsonConvert.DeserializeObject<Dictionary<string, string>>(element.ToString());
+
+                        Dictionary<string, string> keyValuePairDict = new Dictionary<string, string>();
+
+                        for (var i = 0; i < keyLookingFor.Length; i++)
                         {
-
-                            if (newVal.ContainsKey(keyLookingFor[i]))
+                            if (i < 6)
                             {
-                                if (newVal[keyLookingFor[i]] != null && newVal[keyLookingFor[i]] != "")
-                                {
-                                    keyValuePairDict.Add(keyLookingFor[i], newVal[keyLookingFor[i]]);
 
-                                    Console.WriteLine("THE ELEMENT IS: " + newVal[keyLookingFor[i]]);
+                                if (newVal.ContainsKey(keyLookingFor[i]))
+                                {
+                                    if (newVal[keyLookingFor[i]] != null && newVal[keyLookingFor[i]] != "")
+                                    {
+                                        keyValuePairDict.Add(keyLookingFor[i], newVal[keyLookingFor[i]]);
+
+                                        Console.WriteLine("THE ELEMENT IS: " + newVal[keyLookingFor[i]]);
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            int newCount = 1;
-
-
-                            bool isNotFound = false;
-                            do
+                            else
                             {
-                                string keyName = keyLookingFor[i] + newCount;
-                                if (newVal.ContainsKey(keyName))
+                                int newCount = 1;
+
+
+                                bool isNotFound = false;
+                                do
                                 {
-                                    if (newVal[keyName] != null && newVal[keyName] != "")
+                                    string keyName = keyLookingFor[i] + newCount;
+                                    if (newVal.ContainsKey(keyName))
                                     {
-                                        keyValuePairDict.Add(keyName, newVal[keyName]);
-                                        newCount++;
-                                        Console.WriteLine("THE ELEMENT IS: " + newVal[keyName]);
+                                        if (newVal[keyName] != null && newVal[keyName] != "")
+                                        {
+                                            keyValuePairDict.Add(keyName, newVal[keyName]);
+                                            newCount++;
+                                            Console.WriteLine("THE ELEMENT IS: " + newVal[keyName]);
+                                        }
+                                        else
+                                        {
+                                            isNotFound = true;
+                                        }
                                     }
                                     else
                                     {
                                         isNotFound = true;
                                     }
-                                }
-                                else
-                                {
-                                    isNotFound = true;
-                                }
-                            } while (isNotFound == false);
+                                } while (isNotFound == false);
 
+                            }
                         }
+
+                        newDictionary.Add(counter, keyValuePairDict);
+                        counter++;
                     }
 
-                    newDictionary.Add(counter, keyValuePairDict);
-                    counter++;
                 }
-
+            }
+            catch (Exception e)
+            {
+                return "";
             }
             return JsonConvert.SerializeObject(newDictionary);
 

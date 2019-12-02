@@ -22,9 +22,6 @@ namespace A4_Rest_App
         [Obsolete]
         public string GetDotNetCountAsync(string drinkName)
         {
-            string[] keyLookingFor = { "idDrink", "strDrink", "strCategory", "strAlcoholic","strGlass", "strInstructions", "strDrinkThumb", "strIngredient", "strMeasure"};
-
-            // Dictionary<string, Dictionary<string, string>[]> newDictionary = new Dictionary<string, Dictionary<string, string>[]>();
 
             Dictionary<int, Dictionary<string, string>> newDictionary = new Dictionary<int, Dictionary<string, string>>();
 
@@ -34,17 +31,14 @@ namespace A4_Rest_App
             var user = HttpContext.User;
             Boolean isSignedIn = user.Identity.IsAuthenticated;
 
-            if(isSignedIn == true)
+            if (isSignedIn == true)
             {
                 drinkName = drinkName.ToLower();
-                //var client = new RestClient("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=margarita");
                 string url = "https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + drinkName;
 
                 var client = new RestClient(url);
 
                 var request = new RestRequest(Method.GET);
-                //request.AddHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com");
-                //request.AddHeader("key", "1");
                 IRestResponse response = client.Execute(request);
 
                 string data = response.Content;
@@ -53,7 +47,7 @@ namespace A4_Rest_App
 
                 if (values.ContainsKey("drinks"))
                 {
-                   string myDrink =  getDrinkInfo(values);
+                    string myDrink = getDrinkInfo(values);
                     return myDrink;
 
                 }
@@ -62,18 +56,6 @@ namespace A4_Rest_App
                     return "";
                 }
 
-                //Console.WriteLine("NEW DICTIONAIRY: " + JsonConvert.SerializeObject(newDictionary));
-
-                //object test;
-                //if (values.TryGetValue("drinks", out test)) // Returns true.
-                //{
-                //    //Console.WriteLine(test); // This is the value at key1.
-
-
-
-                //    return JsonConvert.SerializeObject(test);
-                //}
-                //return "";
             }
 
             return "";
@@ -83,21 +65,17 @@ namespace A4_Rest_App
         [HttpGet]
         [Route("/api/drink/random")]
         [Obsolete]
-        public string getRandomCocktail(){
+        public string getRandomCocktail() {
             var user = HttpContext.User;
             Boolean isSignedIn = user.Identity.IsAuthenticated;
 
             if (isSignedIn == true)
             {
-                //drinkName = drinkName.ToLower();
-                //var client = new RestClient("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=margarita");
                 string url = "https://www.thecocktaildb.com/api/json/v1/1/random.php";
 
                 var client = new RestClient(url);
 
                 var request = new RestRequest(Method.GET);
-                //request.AddHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com");
-                //request.AddHeader("key", "1");
                 IRestResponse response = client.Execute(request);
 
                 string data = response.Content;
@@ -106,23 +84,20 @@ namespace A4_Rest_App
 
                 string drinkInfo = getDrinkInfo(values);
 
-                //return  JsonConvert.SerializeObject(values);
                 return drinkInfo;
-             }
-             return "";
-        
+            }
+            return "";
+
         }
 
         public string getDrinkInfo(Dictionary<string, object> values)
         {
-              string[] keyLookingFor = { "idDrink", "strDrink", "strCategory", "strAlcoholic","strGlass", "strInstructions", "strDrinkThumb", "strIngredient", "strMeasure"};
-
-            // Dictionary<string, Dictionary<string, string>[]> newDictionary = new Dictionary<string, Dictionary<string, string>[]>();
+            string[] keyLookingFor = { "idDrink", "strDrink", "strCategory", "strAlcoholic", "strGlass", "strInstructions", "strDrinkThumb", "strIngredient", "strMeasure" };
 
             Dictionary<int, Dictionary<string, string>> newDictionary = new Dictionary<int, Dictionary<string, string>>();
             int counter = 1;
-          
 
+            try {
                 foreach (var item in values)
                 {
 
@@ -187,9 +162,12 @@ namespace A4_Rest_App
                     }
 
                 }
+            
+            }catch(Exception e){
+                return "";
+            }
                 return JsonConvert.SerializeObject(newDictionary);
 
-           
         }
     }
 }
