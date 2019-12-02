@@ -14,7 +14,7 @@ using System.Collections;
 
 namespace A4_Rest_App
 {
-    public class WordsController : Controller
+    public class CocktailController : Controller
     {
 
         [HttpGet]
